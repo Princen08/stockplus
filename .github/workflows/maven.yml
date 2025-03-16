@@ -14,16 +14,15 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-  packages: write
-  security-events: write
-  
 jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
