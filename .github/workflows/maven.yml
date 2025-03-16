@@ -14,6 +14,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  packages: write
+  # This is required for dependency graph submission
+  dependabot-alerts: write
+  
 jobs:
   build:
 
@@ -36,3 +42,5 @@ jobs:
       with: 
         directory: ./market_data_service
         maven-args: "-B -f market_data_service/pom.xml"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
