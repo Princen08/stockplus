@@ -17,8 +17,7 @@ on:
 permissions:
   contents: read
   packages: write
-  # This is required for dependency graph submission
-  dependabot-alerts: write
+  security-events: write
   
 jobs:
   build:
