@@ -1,0 +1,141 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center">
+        <a routerLink="/dashboard" class="mr-4 text-blue-500 hover:text-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900">{{ symbol }} Stock Details</h1>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Stock price details -->
+      <div class="px-4 py-6 sm:px-0">
+        <!-- Current price card -->
+        <div *ngIf="stockPrice" class="bg-white overflow-hidden shadow rounded-lg mb-6">
+          <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Current Price</h3>
+              <span class="px-3 py-1 text-sm font-medium rounded-full"
+                    [ngClass]="getPriceChangeClass(stockPrice.change)">
+                {{ formatPercentChange(stockPrice.percentChange) }}
+              </span>
+            </div>
+            <div class="mt-1 text-4xl font-bold text-gray-900">${{ stockPrice.price.toFixed(2) }}</div>
+            <div class="mt-1 text-xl">
+              <span [ngClass]="getPriceChangeClass(stockPrice.change)">
+                {{ formatPriceChange(stockPrice.change) }}
+              </span>
+            </div>
+            <div class="mt-3 flex items-center text-sm text-gray-500">
+              <span>Volume: {{ stockPrice.volume.toLocaleString() }}</span>
+              <span class="ml-auto">{{ stockPrice.timestamp | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price chart -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Price History
+                <span class="text-sm font-normal text-gray-500 ml-2">{{ currentTimeIntervalDisplay }}</span>
+              </h3>
+              
+              <!-- Chart controls -->
+              <div class="flex flex-wrap gap-4">
+                <!-- Chart type selector -->
+                <div class="flex items-center">
+                  <label for="chartType" class="block text-sm font-medium text-gray-700 mr-2">Chart Type:</label>
+                  <select 
+                    id="chartType" 
+                    [(ngModel)]="selectedChartType" 
+                    (change)="onChartTypeChange()"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <option *ngFor="let type of chartTypes" [value]="type">{{ type }}</option>
+                  </select>
+                </div>
+                
+                <!-- Date interval selector -->
+                <div class="flex items-center">
+                  <label for="dateInterval" class="block text-sm font-medium text-gray-700 mr-2">Time Period:</label>
+                  <select 
+                    id="dateInterval" 
+                    [(ngModel)]="selectedDateInterval" 
+                    (change)="onDateIntervalChange()"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <option *ngFor="let interval of dateIntervals" [value]="interval.value">{{ interval.label }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="h-80 relative">
+              <!-- Chart canvas -->
+              <canvas #priceChart class="w-full h-full"></canvas>
+              
+              <!-- Loading indicator -->
+              <div *ngIf="isLoadingHistoricalData" class="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-75">
+                <div class="text-center">
+                  <svg class="animate-spin h-8 w-8 mx-auto mb-2 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <p>Loading chart data...</p>
+                </div>
+              </div>
+              
+              <!-- Error message -->
+              <div *ngIf="loadingError && !isLoadingHistoricalData" class="absolute inset-0 flex items-center justify-center bg-gray-50">
+                <div class="text-center max-w-md px-4">
+                  <svg class="h-12 w-12 mx-auto mb-3 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 mb-2">Unable to load chart data</h3>
+                  <p class="text-sm text-gray-500">{{ loadingError }}</p>
+                  <button 
+                    (click)="loadHistoricalData()" 
+                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Try Again
+                  </button>
+                </div>
+              </div>
+              
+              <!-- No data message -->
+              <div *ngIf="historicalPrices.length === 0 && !isLoadingHistoricalData && !loadingError" class="absolute inset-0 flex items-center justify-center bg-gray-50">
+                <div class="text-center">
+                  <svg class="h-12 w-12 mx-auto mb-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p class="text-gray-500">No historical data available</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading state when no data is available -->
+        <div *ngIf="!stockPrice" class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-12 sm:p-6 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">Loading stock data</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Waiting for data from Kafka...
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div> 

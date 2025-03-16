@@ -1,0 +1,305 @@
+<div class="min-h-screen" [ngClass]="{'dark-mode': isDarkMode, 'bg-gradient-to-b from-gray-50 to-gray-200': !isDarkMode, 'bg-gradient-to-b from-gray-900 to-gray-800': isDarkMode}">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <div class="flex items-center">
+          <h1 class="text-3xl font-bold text-white animate__animated animate__fadeIn">
+            <span class="inline-block transform hover:scale-105 transition-transform duration-300">StockPlus Dashboard</span>
+          </h1>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <!-- Search bar -->
+          <div class="relative w-full sm:w-64 md:w-80" #searchContainer>
+            <div class="relative w-full">
+              <input 
+                type="text" 
+                [(ngModel)]="searchTerm" 
+                (input)="onSearchInput()"
+                (keyup.enter)="searchStock()"
+                placeholder="Search stocks..." 
+                class="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm font-medium text-gray-700 bg-blue-50"
+                [ngClass]="{'dark-search': isDarkMode}"
+              />
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <!-- Clear button -->
+              <div *ngIf="searchTerm" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" (click)="searchTerm = ''; onSearchInput()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Search results dropdown -->
+            <div *ngIf="showSearchResults" class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto">
+              <ul class="py-1" *ngIf="searchResults.length > 0">
+                <li *ngFor="let stock of searchResults" 
+                    (click)="navigateToStockDetail(stock.symbol); closeSearchResults()"
+                    class="px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors duration-150">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium">{{ stock.symbol }}</span>
+                    <span [ngClass]="getPriceChangeClass(stock.change)">
+                      ${{ stock.price.toFixed(2) }} ({{ formatPercentChange(stock.percentChange) }})
+                    </span>
+                  </div>
+                </li>
+              </ul>
+              <div *ngIf="searchResults.length === 0" class="px-4 py-3 text-center text-gray-500">
+                No stocks found matching "{{ searchTerm }}"
+              </div>
+            </div>
+          </div>
+          
+          <!-- Dark mode toggle -->
+          <div class="flex items-center">
+            <label for="darkModeToggle" class="inline-flex relative items-center cursor-pointer">
+              <input type="checkbox" [checked]="isDarkMode" (change)="toggleDarkMode()" id="darkModeToggle" class="sr-only">
+              <div class="w-14 h-7 bg-gray-200 border border-gray-200 toggle-bg" 
+                   [ngClass]="{'bg-blue-600 border-blue-600': isDarkMode, 'bg-gray-200 border-gray-200': !isDarkMode}">
+                <!-- Toggle knob -->
+                <div class="absolute top-0.5 left-0.5 bg-white h-6 w-6 transition-transform duration-300 flex items-center justify-center shadow-md toggle-knob" 
+                     [ngClass]="{'translate-x-7': isDarkMode}">
+                  <!-- Sun icon (shown in light mode) -->
+                  <svg *ngIf="!isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                  </svg>
+                  <!-- Moon icon (shown in dark mode) -->
+                  <svg *ngIf="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </svg>
+                </div>
+                <!-- Light/Dark indicator -->
+                <div class="flex justify-between items-center h-full px-1.5">
+                  <span class="text-xs font-bold text-white opacity-0 md:opacity-100" [ngClass]="{'opacity-0': isDarkMode}"></span>
+                  <span class="text-xs font-bold text-gray-700 opacity-0 md:opacity-100" [ngClass]="{'opacity-0': !isDarkMode}"></span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Loading indicator -->
+      <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+        <div class="text-center">
+          <svg class="animate-spin h-16 w-16 mx-auto mb-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-lg text-gray-700 font-medium animate-pulse">Loading stock data...</p>
+        </div>
+      </div>
+
+      <!-- Stock data content -->
+      <div *ngIf="!isLoading" class="px-4 py-6 sm:px-0 animate__animate">
+        <!-- View controls -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0 bg-white p-4 rounded-lg shadow-md">
+          <!-- Sort options (left) -->
+          <div class="flex items-center">
+            <label for="sort-select" class="mr-2 text-sm font-medium text-gray-700">Sort by:</label>
+            <select 
+              id="sort-select" 
+              [(ngModel)]="currentSort" 
+              (change)="changeSortOrder(currentSort)"
+              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm transition-all duration-300 hover:border-blue-400">
+              <option *ngFor="let option of sortOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+          
+          <!-- View controls (right) -->
+          <div class="flex items-center space-x-4">
+            <!-- View toggle buttons -->
+            <div class="flex border border-gray-300 rounded-md overflow-hidden shadow-sm">
+              <button 
+                (click)="toggleViewMode('grid')" 
+                class="px-3 py-2 text-sm font-medium focus:outline-none transition-all duration-300"
+                [ngClass]="viewMode === 'grid' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Grid
+              </button>
+              <button 
+                (click)="toggleViewMode('table')" 
+                class="px-3 py-2 text-sm font-medium focus:outline-none transition-all duration-300"
+                [ngClass]="viewMode === 'table' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Table
+              </button>
+            </div>
+            <button 
+              (click)="refreshStockData()" 
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
+              [disabled]="isLoading">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+            <div *ngIf="latestUpdateTime" class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md shadow-sm" [ngClass]="{'dark-timestamp': isDarkMode}">
+              <span class="font-medium">Last updated:</span> {{ latestUpdateTime | date:'shortTime' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <div *ngIf="viewMode === 'grid'" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <!-- Stock price card for each stock (paginated) -->
+          <div *ngFor="let stock of paginatedStockPrices; let i = index" 
+               class="bg-white overflow-hidden shadow-md rounded-lg transition-all duration-300 cursor-pointer relative animate__animated stock-card"
+               [style.animation-delay]="i * 0.05 + 's'"
+               (click)="navigateToStockDetail(stock.symbol)">
+            <!-- Click indicator -->
+            <div class="absolute top-2 right-2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+            
+            <!-- Card header with gradient based on price change -->
+            <div class="h-2 w-full" 
+                 [ngClass]="{'bg-gradient-to-r from-green-400 to-green-500': stock.change >= 0, 'bg-gradient-to-r from-red-400 to-red-500': stock.change < 0}">
+            </div>
+            
+            <div class="px-4 py-5 sm:p-6">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ stock.symbol }}</h3>
+                <span class="px-2 py-1 text-xs font-medium rounded-full shadow-sm"
+                      [ngClass]="stock.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                  {{ formatPercentChange(stock.percentChange) }}
+                </span>
+              </div>
+              <div class="mt-1 text-3xl font-semibold text-gray-900">
+                ${{ stock.price.toFixed(2) }}
+              </div>
+              <div class="mt-1">
+                <span [ngClass]="getPriceChangeClass(stock.change)" class="font-medium">
+                  {{ formatPriceChange(stock.change) }}
+                </span>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-sm text-gray-500 border-t pt-2">
+                <span>Volume: {{ stock.volume.toLocaleString() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div *ngIf="viewMode === 'table'" class="overflow-x-auto bg-white rounded-lg shadow-md animate__animated">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Change</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let stock of paginatedStockPrices; let i = index" 
+                  class="hover:bg-blue-50 transition-colors duration-150"
+                  [ngClass]="{'animate__animated': true}"
+                  [style.animation-delay]="i * 0.05 + 's'">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ stock.symbol }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  ${{ stock.price.toFixed(2) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" [ngClass]="getPriceChangeClass(stock.change)">
+                  {{ formatPriceChange(stock.change) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" [ngClass]="getPriceChangeClass(stock.change)">
+                  <span class="px-2 py-1 rounded-full text-xs" [ngClass]="stock.change >= 0 ? 'bg-green-100' : 'bg-red-100'">
+                    {{ formatPercentChange(stock.percentChange) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ stock.volume.toLocaleString() }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button 
+                    (click)="navigateToStockDetail(stock.symbol)" 
+                    class="text-blue-600 hover:text-blue-900 focus:outline-none transition-colors duration-150 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md">
+                    Details
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state when no data is available -->
+        <div *ngIf="stockPricesList.length === 0 && !isLoading" 
+             class="col-span-full bg-white overflow-hidden shadow-md rounded-lg animate__animated">
+          <div class="px-4 py-12 sm:p-6 text-center">
+            <svg class="mx-auto h-16 w-16 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="mt-2 text-xl font-medium text-gray-900">No market data available</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Waiting for market data to be received from Kafka...
+            </p>
+            <button 
+              (click)="refreshStockData()" 
+              class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Try Again
+            </button>
+          </div>
+        </div>
+
+        <!-- Pagination controls (bottom) -->
+        <div *ngIf="totalPages > 1" class="flex justify-between items-center mt-6 bg-white p-4 rounded-lg shadow-md animate__animated">
+          <div class="text-sm text-gray-700">
+            Showing <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> to 
+            <span class="font-medium">{{ paginationEndIndex }}</span> of 
+            <span class="font-medium">{{ stockPricesList.length }}</span> stocks
+          </div>
+          <div class="flex space-x-2">
+            <button 
+              (click)="prevPage()" 
+              [disabled]="currentPage === 1"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+              class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-150 shadow-sm">
+              Previous
+            </button>
+            <div class="flex space-x-1">
+              <ng-container *ngFor="let page of [].constructor(totalPages); let i = index">
+                <button 
+                  *ngIf="i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)"
+                  (click)="goToPage(i + 1)" 
+                  [ngClass]="{'bg-blue-100 text-blue-700 border-blue-500 font-bold': currentPage === i + 1, 'bg-white text-gray-700 hover:bg-gray-50': currentPage !== i + 1}"
+                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium transition-colors duration-150 shadow-sm">
+                  {{ i + 1 }}
+                </button>
+                <span *ngIf="i + 1 === 2 && currentPage > 3" class="px-1 py-1 text-gray-500">...</span>
+                <span *ngIf="i + 1 === totalPages - 1 && currentPage < totalPages - 2" class="px-1 py-1 text-gray-500">...</span>
+              </ng-container>
+            </div>
+            <button 
+              (click)="nextPage()" 
+              [disabled]="currentPage === totalPages"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+              class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-150 shadow-sm">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div> 

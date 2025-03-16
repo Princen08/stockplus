@@ -1,0 +1,323 @@
+/* Import Google Fonts - Roboto and Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Apply fonts to elements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+}
+
+body, p, div, span, button, input, select, textarea {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Dark mode styles */
+:root {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-bg: #f9fafb;
+  --header-gradient-from: #2563eb;
+  --header-gradient-to: #4f46e5;
+  --transition-duration: 0.3s;
+  --green-text: #10b981;
+  --red-text: #ef4444;
+  --blue-text: #3b82f6;
+  --table-header-bg: #f9fafb;
+  --hover-bg: #f3f4f6;
+  --button-hover: #f3f4f6;
+}
+
+.dark-mode {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --card-bg: #1f2937;
+  --border-color: #374151;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --input-bg: #374151;
+  --header-gradient-from: #1e40af;
+  --header-gradient-to: #4338ca;
+  --green-text: #34d399;
+  --red-text: #f87171;
+  --blue-text: #60a5fa;
+  --table-header-bg: #111827;
+  --hover-bg: #2d3748;
+  --button-hover: #2d3748;
+}
+
+/* Apply dark mode variables */
+.dark-mode {
+  background: linear-gradient(to bottom, var(--bg-primary), var(--bg-secondary));
+  color: var(--text-primary);
+}
+
+.dark-mode header {
+  background: linear-gradient(to right, var(--header-gradient-from), var(--header-gradient-to));
+}
+
+.dark-mode .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark-mode .text-gray-700, 
+.dark-mode .text-gray-900,
+.dark-mode .text-gray-600,
+.dark-mode .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .border-gray-300,
+.dark-mode .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+.dark-mode .shadow-md,
+.dark-mode .shadow-sm {
+  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color) !important;
+}
+
+.dark-mode input,
+.dark-mode select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark-mode .hover\:bg-gray-50:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.dark-mode .bg-gray-50,
+.dark-mode .bg-gray-100,
+.dark-mode .from-gray-50,
+.dark-mode .to-gray-100 {
+  background-color: var(--bg-secondary) !important;
+  background-image: none !important;
+}
+
+.dark-mode .divide-gray-200 > * + * {
+  border-color: var(--border-color) !important;
+}
+
+/* Fix text colors in dark mode */
+.dark-mode .text-green-500,
+.dark-mode .text-green-800 {
+  color: var(--green-text) !important;
+}
+
+.dark-mode .text-red-500,
+.dark-mode .text-red-800 {
+  color: var(--red-text) !important;
+}
+
+.dark-mode .text-blue-500,
+.dark-mode .text-blue-600,
+.dark-mode .text-blue-700 {
+  color: var(--blue-text) !important;
+}
+
+/* Fix background colors in dark mode */
+.dark-mode .bg-green-100 {
+  background-color: rgba(52, 211, 153, 0.2) !important;
+}
+
+.dark-mode .bg-red-100 {
+  background-color: rgba(248, 113, 113, 0.2) !important;
+}
+
+.dark-mode .bg-blue-50,
+.dark-mode .bg-blue-100 {
+  background-color: rgba(96, 165, 250, 0.2) !important;
+}
+
+/* Fix table styles in dark mode */
+.dark-mode thead {
+  background: var(--table-header-bg) !important;
+}
+
+.dark-mode tbody tr:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.dark-mode button.hover\:bg-gray-50:hover,
+.dark-mode button.hover\:bg-blue-100:hover {
+  background-color: var(--button-hover) !important;
+}
+
+/* Fix search dropdown in dark mode */
+.dark-mode .absolute.z-10.mt-1.w-full.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark-mode .hover\:bg-blue-50:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Dark mode search bar */
+.dark-mode input.dark-search {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: #4b5563 !important;
+  background-color: #1f2937 !important;
+}
+
+.dark-mode input.dark-search:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+}
+
+.dark-mode input::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark-mode .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.dark-mode .text-gray-400:hover {
+  color: #d1d5db !important;
+}
+
+/* Fix button colors in dark mode */
+.dark-mode button.bg-blue-600,
+.dark-mode button.from-blue-600,
+.dark-mode button.to-indigo-600,
+.dark-mode button.hover\:from-blue-700,
+.dark-mode button.hover\:to-indigo-700 {
+  background: linear-gradient(to right, #3b82f6, #4f46e5) !important;
+}
+
+.dark-mode button.hover\:bg-blue-700:hover {
+  background-color: #2563eb !important;
+}
+
+/* Dark timestamp */
+.dark-timestamp {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color);
+}
+
+/* Dark mode toggle switch */
+.toggle-bg {
+  border-radius: 9999px;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.toggle-bg:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  opacity: 0.5;
+  border-radius: 9999px;
+}
+
+.toggle-knob {
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dark-mode .toggle-knob {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Add a subtle glow effect to the toggle when in dark mode */
+.dark-mode .toggle-bg {
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  border-color: #3b82f6 !important;
+}
+
+/* Animation classes */
+.animate__animated {
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+
+.animate__fadeIn {
+  animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Stock card styles without hover effects */
+.stock-card {
+  transition: all 0.3s ease;
+}
+
+/* Shimmer loading effect */
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark-mode .shimmer {
+  background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .animate__animated {
+    animation-duration: 0.3s; /* Faster animations on mobile */
+  }
+}
+
+/* Add smooth transition for dark mode */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Rounded corners for all elements */
+input, 
+select, 
+button, 
+.shadow-md, 
+.shadow-sm, 
+.stock-card, 
+.bg-white, 
+.bg-gray-100,
+span.px-2 {
+  border-radius: 0.375rem !important; /* This is equivalent to rounded-md in Tailwind */
+}
+
+/* Extra rounded corners for specific elements */
+.toggle-bg,
+.toggle-knob,
+span.rounded-full {
+  border-radius: 9999px !important; /* Full rounded for toggle and badges */
+}
+
+.dark-mode input.dark-search:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+} 
