@@ -19,16 +19,24 @@ import java.util.Properties;
  */
 public class KafkaProducerService {
     private static final Logger logger = LoggerFactory.getLogger(KafkaProducerService.class);
-    private static final String TOPIC_NAME = "stock-prices";
-    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
+    
+    // Get configuration from environment variables or use defaults
+    private final String topicName;
+    private final String bootstrapServers;
     
     private final KafkaProducer<String, String> producer;
     private final ObjectMapper objectMapper;
     
     public KafkaProducerService() {
+        // Read from environment variables with defaults
+        this.topicName = System.getenv("KAFKA_TOPIC") != null ? 
+                System.getenv("KAFKA_TOPIC") : "stock-prices";
+        this.bootstrapServers = System.getenv("KAFKA_BOOTSTRAP_SERVERS") != null ? 
+                System.getenv("KAFKA_BOOTSTRAP_SERVERS") : "localhost:9092";
+        
         // Configure Kafka producer properties
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.ACKS_CONFIG, "1");
@@ -37,7 +45,12 @@ public class KafkaProducerService {
         properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, "30000"); // 30 seconds
         properties.put(ProducerConfig.METADATA_MAX_AGE_CONFIG, "10000"); // 10 seconds
         properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "500"); // 500ms
-        properties.put(ProducerConfig.RETRIES_CONFIG, "3"); // 3 retries
+        properties.put(ProducerConfig.RETRIES_CONFIG, "5"); // Increase retries for Docker environment
+        
+        // Add additional configs for Docker networking
+        properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "20000"); // 20 seconds
+        properties.put(ProducerConfig.RECONNECT_BACKOFF_MAX_MS_CONFIG, "5000"); // 5 seconds max backoff
+        properties.put(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "1000"); // 1 second initial backoff
         
         // Create Kafka producer
         this.producer = new KafkaProducer<>(properties);
@@ -47,8 +60,8 @@ public class KafkaProducerService {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         
-        logger.info("Kafka producer initialized with bootstrap servers: {}", BOOTSTRAP_SERVERS);
-        logger.info("Publishing to topic: {}", TOPIC_NAME);
+        logger.info("Kafka producer initialized with bootstrap servers: {}", bootstrapServers);
+        logger.info("Publishing to topic: {}", topicName);
     }
     
     /**
@@ -63,7 +76,7 @@ public class KafkaProducerService {
             
             // Create a producer record with the stock symbol as the key
             ProducerRecord<String, String> record = new ProducerRecord<>(
-                    TOPIC_NAME,
+                    topicName,
                     stockPrice.getSymbol(),
                     stockPriceJson
             );
